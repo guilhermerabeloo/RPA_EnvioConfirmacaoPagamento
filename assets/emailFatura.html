@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="max-width: 600px; margin: 20px auto; background-color: #FFFFFF; padding: 20px; box-sizing: border-box; border-radius: 10px; box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.3);">
+    <header>
+        <img src="https://integrador.grupofornecedora.com.br/imagens/headerFornecedora.jpg" width="560"></img>
+    </header>
+    <main>
+        <p style="width: 100%;">Data: <b>{dataEmail}</b></p>
+        <p style="width: 100%;">Empresa: <b>{empresa}</b></p>
+        <br>
+        <p>Ao departamento Financeiro da empresa <b>{fornecedor}</b>, segue o demontrativo de pagamento.</p>
+        <table style="width: 100%;">
+            <tr>
+                <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Referência</th>
+                <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Parcela</th>
+                <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Data de Pagamento</th>
+                <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Valor do Título</th>
+            </tr>
+            {% for row in data %}
+            <tr>
+                <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">{{row.nota}}</td>
+                <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">{{row.parcela}}</td>
+                <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">{{row.dataPagamento}}</td>
+                <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">R$ {{row.valorTitulo}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <p style="line-height: 1.5;">
+            Total Bruto: R$ {totalBruto} <br>
+            Total de Juros: R$ {totalJuros} <br>
+            Total de Deduções de Impostos: R$ {deducoesImpostos} <br>
+            Total de Descontos: R$ {descontos} <br>
+            Valor líquido pago: R$ {totalLiquido} <br>
+            {fornecedor}
+        </p>
+        <br>
+        <p style="font-size: 11px;">
+            Este é um e-mail automático favor não responder. Caso tenha alguma dúvida entre em contato com o nosso financeiro através do e-mail <b>contas.pagar@grupofornecedora.com.br.</b>
+        </p>
+    </main>
+    <footer>
+        <img src="https://integrador.grupofornecedora.com.br/imagens/footerFornecedora.jpg" width="560"></img>
+    </footer>
+</body>
+</html>

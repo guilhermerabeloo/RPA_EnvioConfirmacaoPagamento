@@ -22,11 +22,6 @@ def envioDoEmail(tipo, dados):
         html_body = template.render(data=dados['parcelas'])
         html_body = html_body.format(dataEmail=dados['dataEmail'], empresa=dados['empresa'], fornecedor=dados['fornecedor'], totalBruto=dados['totalBruto'], totalJuros=dados['totalJuros'], deducoesImpostos=dados['deducoesImpostos'], descontos=dados['descontos'], totalLiquido=dados['totalLiquido'])
 
-        # html_file_path_lancamento = os.path.join(os.path.dirname(__file__), '../assets', 'emailLancamento.html')
-        # with open(html_file_path_lancamento, 'r', encoding='utf-8') as file:
-        #     html_body = file.read()
-        #     html_body = html_body.format(referencia=dados['referencia'], dataPagamento=dados['dataPagamento'], valorTitulo=dados['valorTitulo'], dataEmail=dados['dataEmail'], empresa=dados['empresa'], fornecedor=dados['fornecedor'], totalBruto=dados['totalBruto'], totalJuros=dados['totalJuros'], deducoesImpostos=dados['deducoesImpostos'], descontos=dados['descontos'], totalLiquido=dados['totalLiquido'])
-
     email.To = dados['para']
     # email.BCC = emailsCopiaOculta
     email.Subject = 'Comprovante de pagamento'
