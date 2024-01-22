@@ -14,7 +14,7 @@
         <p>Ao departamento Financeiro da empresa <b>{fornecedor}</b>, segue o demontrativo de pagamento.</p>
         <table style="width: 100%;">
             <tr>
-                <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Referência</th>
+                <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Nota Fiscal</th>
                 <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Parcela</th>
                 <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Data de Pagamento</th>
                 <th style="border-collapse: collapse; border: 1px solid #ddd; font-size: 17px; background-color: #e5e5e5;">Valor do Título</th>
@@ -24,16 +24,16 @@
                 <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">{{row.nota}}</td>
                 <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">{{row.parcela}}</td>
                 <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">{{row.dataPagamento}}</td>
-                <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">R$ {{row.valorTitulo}}</td>
+                <td style="border-collapse: collapse; border: 2px solid #ddd; font-size: 17px; text-align: center;">{{row.valorTitulo}}</td>
             </tr>
             {% endfor %}
         </table>
         <p style="line-height: 1.5;">
-            Total Bruto: R$ {totalBruto} <br>
-            Total de Juros: R$ {totalJuros} <br>
-            Total de Deduções de Impostos: R$ {deducoesImpostos} <br>
-            Total de Descontos: R$ {descontos} <br>
-            Valor líquido pago: R$ {totalLiquido} <br>
+            Total Bruto: {totalBruto} <br>
+            Total de Juros: {totalJuros} <br>
+            Total de Deduções de Impostos: {deducoesImpostos} <br>
+            Total de Descontos: {descontos} <br>
+            Valor líquido pago: {totalLiquido} <br>
             {fornecedor}
         </p>
         <br>
