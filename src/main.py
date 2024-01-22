@@ -20,12 +20,12 @@ logger.info("=-=-=-=-=-=-=-=-INICIO DA EXECUCAO=-=-=-=-=-=-=-=-")
 try:
     envioObrigacoes()
 except Exception as err:
-    logging.error(f'Há erros no envio de obrigacoes')
+    logging.error(f'Há erros no envio de obrigacoes {err}')
 
 try:
     envioFaturas()
 except Exception as err:
-    logging.error(f'Há erros no envio de faturas')
+    logging.error(f'Há erros no envio de faturas {err}')
 
 
 logger.info("=-=-=-=-=-=-=-=-FIM DA EXECUCAO=-=-=-=-=-=-=-=-")

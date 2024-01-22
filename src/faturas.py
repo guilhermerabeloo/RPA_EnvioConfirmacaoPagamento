@@ -1,6 +1,8 @@
 from sql import sqlPool
 from email import envioDoEmail
 import locale
+import datetime
+import time
 
 def envioFaturas():
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -15,6 +17,7 @@ def envioFaturas():
             empresa = fornecedor[3]
             email = fornecedor[4]
             fatura = fornecedor[5]
+            bdEmpresa = fornecedor[6]
 
             faturas = sqlPool("SELECT", f"EXEC voucherzero.faturasDoDia '{fatura}'")
             notas = []
@@ -47,9 +50,9 @@ def envioFaturas():
                                     ROUND(ISNULL(sum(ISNULL(nfed.nf_vlicms,0)+ISNULL(nfei.nf_vlicms,0)+ISNULL(nfed.nf_vlicmsret,0)+ISNULL(nfei.nf_vlicmsret,0)),0),2) as ICMS,                                             
                                     ROUND(ISNULL(sum(ISNULL(nfed.nf_vlipi,0)+ISNULL(nfei.nf_vlipi,0)),0),2) as IPI,                                                    
                                     ROUND(ISNULL(sum(nfe.nf_vlfcp),0),2) as FECOP                                                    
-                                FROM [BD_LOG_MTZ]..ger_nfe nfe                                                    
-                                LEFT JOIN [BD_LOG_MTZ]..ger_nfed nfed ON nfed.nf_lanc = nfe.nf_lanc                            
-                                LEFT JOIN [BD_LOG_MTZ]..ger_nfei nfei ON nfei.nf_lanc = nfe.nf_lanc                                                    
+                                FROM {bdEmpresa}..ger_nfe nfe                                                    
+                                LEFT JOIN {bdEmpresa}..ger_nfed nfed ON nfed.nf_lanc = nfe.nf_lanc                            
+                                LEFT JOIN {bdEmpresa}..ger_nfei nfei ON nfei.nf_lanc = nfe.nf_lanc                                                    
                                 WHERE 
                                     nfe.nf_lanc in ({notas_str})
                                     AND nfe.nf_dtcanc IS NULL 
@@ -57,16 +60,27 @@ def envioFaturas():
             
             impostosScr = sqlPool("SELECT", f"""
                                 SELECT 
-                                    (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R2' and ob_lanc IN ({lancamentos_str})) AS PIS,
-                                    (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R3' and ob_lanc IN ({lancamentos_str})) AS COFINS,
-                                    (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R4' and ob_lanc IN ({lancamentos_str})) AS CSLL
+                                    CASE 
+                                        WHEN 
+                                            (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R2' and ob_lanc IN ({lancamentos_str})) IS NULL THEN 0	
+                                        ELSE (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R2' and ob_lanc IN ({lancamentos_str}))
+                                    END AS PIS,
+                                    CASE
+                                        WHEN 
+                                            (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R3' and ob_lanc IN ({lancamentos_str})) IS NULL THEN 0
+                                        ELSE (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R3' and ob_lanc IN ({lancamentos_str}))
+                                    END AS COFINS,
+                                    CASE
+                                        WHEN (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R4' and ob_lanc IN ({lancamentos_str})) IS NULL THEN 0
+                                        ELSE (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R4' and ob_lanc IN ({lancamentos_str}))
+                                    END AS CSLL
                                 """)
             totalImpostos = sum(impostosEad[0]) + sum(impostosScr[0])
-
+            dataAtual = datetime.datetime.now().strftime('%d/%m/%Y')
 
             dados = {
-                'para': 'guilherme.rabelo@grupofornecedora.com.br',
-                'dataEmail': '20/12/2023',
+                'para': email,
+                'dataEmail': dataAtual,
                 'empresa': empresa,
                 'fornecedor': nomeFornecedor,
                 'totalBruto': locale.currency((totalLiquido + totalImpostos), grouping=True),
@@ -78,12 +92,16 @@ def envioFaturas():
             }
 
             envioDoEmail('fatura', dados)
+
             sqlPool("INSERT", f"""
                     INSERT INTO [voucherzero].[log_execucoes]
                     (empresa, fornecedor, fatura, sucesso)
                     VALUES
                     ('{codEmpresa}', '{codFornecedor}', '1', '1')
                     """)
+            print(f'{i} Sucesso no envio da fatura')
+            time.sleep(10)
+
         except Exception as err:
             sqlPool("INSERT", f"""
                     INSERT INTO [voucherzero].[log_execucoes]
@@ -91,4 +109,6 @@ def envioFaturas():
                     VALUES
                     ('{codEmpresa}', '{codFornecedor}', '1', '0')
                     """)
+            print(f'{i} Erro no envio da fatura')
+            time.sleep(10)
             continue

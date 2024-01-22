@@ -1,6 +1,8 @@
 from sql import sqlPool
 from email import envioDoEmail
 import locale
+import datetime
+import time
 
 def envioObrigacoes():
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
@@ -17,6 +19,7 @@ def envioObrigacoes():
             bdEmpresa = fornecedor[5]
 
             obrigacoes = sqlPool("SELECT", f"EXEC voucherzero.obrigacoesDoDia '{codFornecedor}', '{codEmpresa}'")
+
             notas = []
             lancamentos = []
             parcelas = []
@@ -53,17 +56,30 @@ def envioObrigacoes():
                                     nfe.nf_lanc in ({notas_str})
                                     AND nfe.nf_dtcanc IS NULL 
                                 """)
+                       
             impostosScr = sqlPool("SELECT", f"""
                                 SELECT 
-                                    (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R2' and ob_lanc IN ({lancamentos_str})) AS PIS,
-                                    (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R3' and ob_lanc IN ({lancamentos_str})) AS COFINS,
-                                    (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R4' and ob_lanc IN ({lancamentos_str})) AS CSLL
+                                    CASE 
+                                        WHEN 
+                                            (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R2' and ob_lanc IN ({lancamentos_str})) IS NULL THEN 0	
+                                        ELSE (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R2' and ob_lanc IN ({lancamentos_str}))
+                                    END AS PIS,
+                                    CASE
+                                        WHEN 
+                                            (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R3' and ob_lanc IN ({lancamentos_str})) IS NULL THEN 0
+                                        ELSE (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R3' and ob_lanc IN ({lancamentos_str}))
+                                    END AS COFINS,
+                                    CASE
+                                        WHEN (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R4' and ob_lanc IN ({lancamentos_str})) IS NULL THEN 0
+                                        ELSE (SELECT SUM(cdo_vl) FROM BD_MTZ_FOR..scp_cdo WHERE cdo_cd = 'R4' and ob_lanc IN ({lancamentos_str}))
+                                    END AS CSLL
                                 """)
             totalImpostos = sum(impostosEad[0]) + sum(impostosScr[0])
+            dataAtual = datetime.datetime.now().strftime('%d/%m/%Y')
 
             dados = {
-                'para': 'guilherme.rabelo@grupofornecedora.com.br',
-                'dataEmail': '20/12/2023',
+                'para': email,
+                'dataEmail': dataAtual,
                 'empresa': empresa,
                 'fornecedor': nomeFornecedor,
                 'totalBruto': locale.currency((totalLiquido + totalImpostos), grouping=True),
@@ -82,6 +98,9 @@ def envioObrigacoes():
                     VALUES
                     ('{codEmpresa}', '{codFornecedor}', '0', '1')
                     """)
+            print(f'{i} Sucesso no envio da obrigacao')
+            time.sleep(10)
+
         except Exception as err:
             sqlPool("INSERT", f"""
                     INSERT INTO [voucherzero].[log_execucoes]
@@ -89,6 +108,9 @@ def envioObrigacoes():
                     VALUES
                     ('{codEmpresa}', '{codFornecedor}', '0', '0')
                     """)
+            print(f'{i} Erro no envio da obrigacao')
+            time.sleep(10)
+            
             continue
         
         
