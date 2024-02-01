@@ -31,7 +31,8 @@ def envioFaturas():
                 totalLiquido += fatura[8]
                 totalJuros += fatura[10]
                 totalDescontos += fatura[12]
-                notas.append(fatura[4])
+                if fatura[4]!=None:
+                    notas.append(fatura[4])
                 lancamentos.append(fatura[0])
                 parcelas.append({
                     'nota': fatura[6],

@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 logger.info("=-=-=-=-=-=-=-=-INICIO DA EXECUCAO=-=-=-=-=-=-=-=-")
     
-try:
-    envioObrigacoes()
-except Exception as err:
-    logging.error(f'Há erros no envio de obrigacoes {err}')
+# try:
+#     envioObrigacoes()
+# except Exception as err:
+#     logging.error(f'Há erros no envio de obrigacoes {err}')
 
 try:
     envioFaturas()
